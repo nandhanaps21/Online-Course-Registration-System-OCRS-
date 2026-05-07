@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CMRU Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: #f0f4f8;
+      min-height: 100vh;
+    }
+
+    /* NAVBAR */
+    .navbar {
+      background: #0e8a7a;
+      color: white;
+      padding: 14px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .navbar h1 { font-size: 18px; font-weight: 800; }
+    .logout-btn {
+      background: white;
+      color: #0e8a7a;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+    }
+    .logout-btn:hover { background: #e0f7f4; }
+
+    /* TABS */
+    .tabs {
+      background: white;
+      display: flex;
+      border-bottom: 2px solid #e5e7eb;
+      padding: 0 28px;
+    }
+    .tab-btn {
+      padding: 14px 20px;
+      border: none;
+      background: none;
+      font-size: 14px;
+      font-weight: 700;
+      color: #aaa;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      font-family: 'Nunito', sans-serif;
+    }
+    .tab-btn.active { color: #0e8a7a; border-bottom-color: #0e8a7a; }
+    .tab-btn:hover { color: #0e8a7a; }
+
+    .container { max-width: 860px; margin: 28px auto; padding: 0 18px; }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    h2 { color: #1a1a2e; font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+    .subtitle { color: #888; font-size: 13px; margin-bottom: 20px; }
+
+    /* CARD */
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 22px;
+      margin-bottom: 18px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+    }
+    .card h3 {
+      color: #0e8a7a;
+      font-size: 15px;
+      font-weight: 800;
+      border-bottom: 1px solid #f0f0f0;
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #444;
+      display: block;
+      margin-bottom: 4px;
+      margin-top: 12px;
+    }
+
+    select, input[type="number"], input[type="text"] {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: 'Nunito', sans-serif;
+      outline: none;
+      transition: border 0.2s;
+    }
+    select:focus, input:focus { border-color: #0e8a7a; }
+
+    .btn-green {
+      background: #0e8a7a;
+      color: white;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      margin-top: 12px;
+    }
+    .btn-green:hover { background: #0b7066; }
+    .btn-green:disabled { background: #ccc; cursor: not-allowed; }
+
+    .btn-outline {
+      background: white;
+      color: #0e8a7a;
+      border: 1.5px solid #0e8a7a;
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      margin-top: 12px;
+    }
+    .btn-outline:hover { background: #e6f7f5; }
+
+    .btn-remove {
+      background: #fee2e2;
+      color: #dc2626;
+      border: 1px solid #fca5a5;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+    }
+    .btn-remove:hover { background: #dc2626; color: white; }
+
+    .success-msg {
+      background: #e6f7f5;
+      color: #0e8a7a;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      display: none;
+    }
+
+    /* SUBJECTS LIST (enrollment) */
+    .subject-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border: 1.5px solid #e5e5e5;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .subject-item.enrolled {
+      background: #e6f7f5;
+      border-color: #0e8a7a;
+      color: #0e8a7a;
+      font-weight: 600;
+    }
+    .subject-item:hover:not(.enrolled) { background: #f9f9f9; }
+
+    /* TABLE */
+    table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+    th { background: #f5f5f5; padding: 10px 12px; text-align: left; color: #555; font-weight: 700; border-bottom: 2px solid #eee; }
+    td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; }
+    .empty-msg { text-align: center; color: #aaa; font-size: 14px; padding: 24px; }
+
+    /* ─── ATTENDANCE ─── */
+    .att-header-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 90px;
+      gap: 8px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #999;
+      text-align: center;
+    }
+    .att-header-row span:first-child { text-align: left; }
+
+    .att-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 90px;
+      gap: 8px;
+      align-items: center;
+      background: #f9fafb;
+      border: 1.5px solid #eee;
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      transition: border-color 0.2s;
+    }
+    .att-row:hover { border-color: #0e8a7a33; }
+
+    .att-row .subj-name {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #222;
+    }
+
+    .att-row input {
+      width: 100% !important;
+      padding: 7px !important;
+      text-align: center;
+      font-size: 14px;
+      border-radius: 8px;
+      margin: 0 !important;
+    }
+
+    .pct-pill {
+      text-align: center;
+      font-weight: 800;
+      font-size: 13px;
+      padding: 5px 10px;
+      border-radius: 20px;
+      background: #eee;
+      color: #999;
+    }
+    .pct-green  { background: #d1fae5; color: #065f46; }
+    .pct-yellow { background: #fef9c3; color: #92400e; }
+    .pct-red    { background: #fee2e2; color: #dc2626; }
+
+    /* Summary boxes */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .summary-box {
+      background: white;
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      border-top: 3px solid #0e8a7a;
+    }
+    .summary-box .big { font-size: 26px; font-weight: 800; color: #0e8a7a; }
+    .summary-box .lbl { font-size: 11px; color: #999; margin-top: 4px; font-weight: 600; }
+
+    .warn-box {
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      font-weight: 600;
+      margin-top: 14px;
+    }
+    .warn-danger { background: #fee2e2; color: #dc2626; }
+    .warn-ok     { background: #d1fae5; color: #065f46; }
+
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+  </style>
+</head>
+<body>
+
+<div class="navbar">
+  <h1>🏛️ CMRU Academic Portal</h1>
+  <div>
+    <span id="navUser" style="font-size:14px; margin-right:10px;"></span>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" id="btn-enrollment" onclick="showTab('enrollment')">📚 Course Registration</button>
+  <button class="tab-btn" id="btn-attendance" onclick="showTab('attendance')">📅 Attendance</button>
+</div>
+
+<div class="container">
+
+  <!-- ═══ TAB 1: ENROLLMENT ═══ -->
+  <div class="tab-content active" id="tab-enrollment">
+    <h2>Course Registration</h2>
+    <p class="subtitle">Pick your semester and course, then enroll in subjects.</p>
+
+    <div class="card">
+      <h3>📚 Enroll in Subjects</h3>
+      <div class="success-msg" id="successMsg"></div>
+
+      <label>Semester</label>
+      <select id="semSelect" onchange="loadSubjects()">
+        <option value="1">Semester 1</option>
+        <option value="2">Semester 2</option>
+        <option value="3">Semester 3</option>
+        <option value="4">Semester 4</option>
+        <option value="5">Semester 5</option>
+        <option value="6">Semester 6</option>
+      </select>
+
+      <label>Course</label>
+      <select id="courseSelect" onchange="loadSubjects()">
+        <option value="">-- Select a Course --</option>
+        <option value="BCA General">BCA General</option>
+        <option value="BCA Cloud Computing">BCA Cloud Computing</option>
+        <option value="BCA Game Development">BCA Game Development</option>
+        <option value="BCA Data Science">BCA Data Science</option>
+      </select>
+
+      <label>Subjects</label>
+      <div id="subjectList">
+        <p style="color:#aaa;font-size:14px;padding:8px 0;">Select a course above to see subjects.</p>
+      </div>
+
+      <button class="btn-green" id="enrollBtn" onclick="enroll()" disabled>Enroll Now</button>
+    </div>
+
+    <div class="card">
+      <h3>🗂️ My Enrollments</h3>
+      <div id="enrollmentTable"></div>
+    </div>
+  </div>
+
+  <!-- ═══ TAB 2: ATTENDANCE ═══ -->
+  <div class="tab-content" id="tab-attendance">
+    <h2>Attendance Tracker</h2>
+    <p class="subtitle">Enter classes held and attended for each subject to see your percentage.</p>
+
+    <div class="card">
+      <h3>📅 Subject-wise Attendance</h3>
+
+      <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:14px;">
+        <div style="flex:1; min-width:140px;">
+          <label>Semester</label>
+          <select id="attSem" onchange="loadAttendance()">
+            <option value="1">Semester 1</option>
+            <option value="2">Semester 2</option>
+            <option value="3">Semester 3</option>
+            <option value="4">Semester 4</option>
+            <option value="5">Semester 5</option>
+            <option value="6">Semester 6</option>
+          </select>
+        </div>
+        <div style="flex:1; min-width:140px;">
+          <label>Course</label>
+          <select id="attCourse" onchange="loadAttendance()">
+            <option value="">-- Select Course --</option>
+            <option value="BCA General">BCA General</option>
+            <option value="BCA Cloud Computing">BCA Cloud Computing</option>
+            <option value="BCA Game Development">BCA Game Development</option>
+            <option value="BCA Data Science">BCA Data Science</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="attRows">
+        <p style="color:#aaa;font-size:14px;padding:8px 0;">Select a course above to track attendance.</p>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-green" onclick="saveAttendance()">💾 Save</button>
+        <button class="btn-outline" onclick="resetAttendance()">🔄 Reset</button>
+      </div>
+    </div>
+
+    <div class="card" id="summaryCard" style="display:none;">
+      <h3>📊 Overall Summary</h3>
+      <div class="summary-grid" id="summaryGrid"></div>
+      <div id="warnBox"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ── INIT ──
+  var username = localStorage.getItem("username") || "Student";
+  document.getElementById("navUser").textContent = "👤 " + username;
+
+  function logout() {
+    localStorage.removeItem("username");
+    localStorage.removeItem("role");
+    window.location.href = "http://localhost/cmru/index.html";
+  }
+
+  function showTab(name) {
+    // hide all tabs
+    document.getElementById("tab-enrollment").classList.remove("active");
+    document.getElementById("tab-attendance").classList.remove("active");
+    document.getElementById("btn-enrollment").classList.remove("active");
+    document.getElementById("btn-attendance").classList.remove("active");
+    // show selected
+    document.getElementById("tab-" + name).classList.add("active");
+    document.getElementById("btn-" + name).classList.add("active");
+  }
+
+  // ── SUBJECT DATA ──
+  var subjects = {
+    1: {
+      "BCA General":          ["Fundamentals of Computer Science","Mathematics I","C Programming","Digital Logic Design","Communication Skills","Computer Lab I"],
+      "BCA Cloud Computing":  ["Fundamentals of Computer Science","Mathematics I","C Programming","Introduction to Cloud Concepts","Communication Skills","Cloud Lab Basics"],
+      "BCA Game Development": ["Fundamentals of Computer Science","Mathematics I","C Programming","Introduction to Game Industry","Communication Skills","Computer Lab I"],
+      "BCA Data Science":     ["Fundamentals of Computer Science","Mathematics I","C Programming","Introduction to Data Science","Statistics Basics","Data Lab I"]
+    },
+    2: {
+      "BCA General":          ["Data Structures","Mathematics II","Python Programming","Web Design Basics","Operating Systems","Python Lab"],
+      "BCA Cloud Computing":  ["Data Structures","Mathematics II","Python Programming","Linux & Shell Scripting","Virtualization Basics","Cloud CLI Lab"],
+      "BCA Game Development": ["Data Structures","Mathematics II","Python Programming","2D Game Design Principles","Graphics Fundamentals","Game Prototype Lab"],
+      "BCA Data Science":     ["Data Structures","Mathematics II","Python Programming","Data Wrangling","Probability & Statistics","Python Data Lab"]
+    },
+    3: {
+      "BCA General":          ["Database Management Systems","Java Programming","Computer Networks","Software Engineering","Statistics","DBMS Lab"],
+      "BCA Cloud Computing":  ["Database Management Systems","Java Programming","Computer Networks","AWS Cloud Foundations","DevOps Basics","AWS Lab"],
+      "BCA Game Development": ["Database Management Systems","Java Programming","Computer Networks","Unity Engine Basics","Physics for Games","Unity Lab"],
+      "BCA Data Science":     ["Database Management Systems","Java Programming","Computer Networks","Data Visualization","NumPy & Pandas","Data Visualization Lab"]
+    },
+    4: {
+      "BCA General":          ["Advanced Java","Web Technologies","Computer Architecture","Theory of Computation","Elective I","Web Dev Lab"],
+      "BCA Cloud Computing":  ["Advanced Java","Cloud Security","Microservices Architecture","Docker & Kubernetes","Elective I","Container Lab"],
+      "BCA Game Development": ["Advanced Java","3D Modelling & Animation","Game Physics Engine","Shader Programming","Elective I","3D Game Lab"],
+      "BCA Data Science":     ["Advanced Java","Machine Learning Basics","Big Data Fundamentals","SQL & NoSQL Databases","Elective I","ML Basics Lab"]
+    },
+    5: {
+      "BCA General":          ["Artificial Intelligence","Mobile App Development","Information Security","Software Testing","Elective II","AI Lab"],
+      "BCA Cloud Computing":  ["Artificial Intelligence on Cloud","Serverless Computing","Cloud Cost Management","Big Data & Hadoop","Elective II","Big Data Lab"],
+      "BCA Game Development": ["Artificial Intelligence for Games","Multiplayer Game Development","AR/VR Development","Game Monetization","Elective II","AR/VR Lab"],
+      "BCA Data Science":     ["Deep Learning","Natural Language Processing","Data Mining","Business Intelligence","Elective II","Deep Learning Lab"]
+    },
+    6: {
+      "BCA General":          ["Machine Learning","Cloud Computing Basics","Project Management","Entrepreneurship","Major Project","Viva Voce"],
+      "BCA Cloud Computing":  ["Machine Learning on Cloud","Azure & GCP Overview","Cloud Capstone Project","Entrepreneurship","Major Project","Viva Voce"],
+      "BCA Game Development": ["Machine Learning in Games","Game Publishing & Marketing","Portfolio Development","Entrepreneurship","Major Project","Viva Voce"],
+      "BCA Data Science":     ["AI & Ethics","Data Science Capstone","Model Deployment & MLOps","Entrepreneurship","Major Project","Viva Voce"]
+    }
+  };
+
+  function getSubjects(sem, course) {
+    return (subjects[sem] && subjects[sem][course]) ? subjects[sem][course] : [];
+  }
+
+  // ─────────────────────────────────────
+  // ENROLLMENT
+  // ─────────────────────────────────────
+  function getEnrollments() {
+    return JSON.parse(localStorage.getItem("enrollments") || "[]");
+  }
+
+  function saveEnrollments(list) {
+    localStorage.setItem("enrollments", JSON.stringify(list));
+  }
+
+  function loadSubjects() {
+    var sem    = document.getElementById("semSelect").value;
+    var course = document.getElementById("courseSelect").value;
+    var list   = document.getElementById("subjectList");
+
+    if (!course) {
+      list.innerHTML = "<p style='color:#aaa;font-size:14px;padding:8px 0;'>Select a course above to see subjects.</p>";
+      document.getElementById("enrollBtn").disabled = true;
+      return;
+    }
+
+    var subjectArr  = getSubjects(sem, course);
+    var enrollments = getEnrollments();
+    var html = "";
+
+    for (var i = 0; i < subjectArr.length; i++) {
+      var subj    = subjectArr[i];
+      var already = enrollments.some(function(e) {
+        return e.student === username && e.subject === subj && e.sem === sem;
+      });
+
+      if (already) {
+        html += "<div class='subject-item enrolled'><input type='checkbox' checked disabled> " + subj + " ✓</div>";
+      } else {
+        html += "<div class='subject-item'><input type='checkbox' value='" + subj + "' onchange='checkBtn()'> " + subj + "</div>";
+      }
+    }
+
+    list.innerHTML = html || "<p style='color:#aaa;font-size:14px;'>No subjects found.</p>";
+    checkBtn();
+  }
+
+  function checkBtn() {
+    var checked = document.querySelectorAll("#subjectList input[type='checkbox']:not(:disabled):checked");
+    document.getElementById("enrollBtn").disabled = (checked.length === 0);
+  }
+
+  function enroll() {
+    var sem        = document.getElementById("semSelect").value;
+    var course     = document.getElementById("courseSelect").value;
+    var checkboxes = document.querySelectorAll("#subjectList input[type='checkbox']:not(:disabled):checked");
+    if (!checkboxes.length) return;
+
+    var list   = getEnrollments();
+    var added  = [];
+
+    for (var i = 0; i < checkboxes.length; i++) {
+      var s = checkboxes[i].value;
+      list.push({ student: username, course: course, subject: s, sem: sem });
+      added.push(s);
+    }
+
+    saveEnrollments(list);
+
+    var msg = document.getElementById("successMsg");
+    msg.textContent   = "✅ Enrolled in: " + added.join(", ");
+    msg.style.display = "block";
+    setTimeout(function() { msg.style.display = "none"; }, 4000);
+
+    loadSubjects();
+    showEnrollmentTable();
+  }
+
+  function removeEnrollment(subject, sem) {
+    var updated = getEnrollments().filter(function(e) {
+      return !(e.student === username && e.subject === subject && e.sem === sem);
+    });
+    saveEnrollments(updated);
+    loadSubjects();
+    showEnrollmentTable();
+  }
+
+  function showEnrollmentTable() {
+    var mine = getEnrollments().filter(function(e) { return e.student === username; });
+    var el   = document.getElementById("enrollmentTable");
+
+    if (!mine.length) {
+      el.innerHTML = "<div class='empty-msg'>No enrollments yet.</div>";
+      return;
+    }
+
+    var semLabel = { "1":"Sem 1","2":"Sem 2","3":"Sem 3","4":"Sem 4","5":"Sem 5","6":"Sem 6" };
+    var html = "<table><thead><tr><th>Subject</th><th>Course</th><th>Semester</th><th>Action</th></tr></thead><tbody>";
+    mine.forEach(function(e) {
+      html += "<tr><td><strong>" + e.subject + "</strong></td><td>" + e.course + "</td><td>" + (semLabel[e.sem] || e.sem) + "</td>" +
+              "<td><button class='btn-remove' onclick=\"removeEnrollment('" + e.subject + "','" + e.sem + "')\">Remove</button></td></tr>";
+    });
+    html += "</tbody></table>";
+    el.innerHTML = html;
+  }
+
+  // ─────────────────────────────────────
+  // ATTENDANCE  (simple version)
+  // ─────────────────────────────────────
+  function getSavedAtt(sem, course) {
+    var all = JSON.parse(localStorage.getItem("att_" + username) || "{}");
+    return all[sem + "_" + course] || {};
+  }
+
+  function saveAllAtt(sem, course, data) {
+    var all = JSON.parse(localStorage.getItem("att_" + username) || "{}");
+    all[sem + "_" + course] = data;
+    localStorage.setItem("att_" + username, JSON.stringify(all));
+  }
+
+  function loadAttendance() {
+    var sem    = document.getElementById("attSem").value;
+    var course = document.getElementById("attCourse").value;
+    var rows   = document.getElementById("attRows");
+
+    if (!course) {
+      rows.innerHTML = "<p style='color:#aaa;font-size:14px;padding:8px 0;'>Select a course above to track attendance.</p>";
+      document.getElementById("summaryCard").style.display = "none";
+      return;
+    }
+
+    var subjectArr = getSubjects(sem, course);
+    var saved      = getSavedAtt(sem, course);
+
+    // Header row
+    var html = "<div class='att-header-row'><span>Subject</span><span>Classes Held</span><span>Attended</span><span>%</span></div>";
+
+    for (var i = 0; i < subjectArr.length; i++) {
+      var subj  = subjectArr[i];
+      var key   = subj.replace(/\s+/g, "_");
+      var held  = saved[key] ? saved[key].held : "";
+      var att   = saved[key] ? saved[key].att  : "";
+
+      html += "<div class='att-row'>" +
+              "<span class='subj-name'>" + subj + "</span>" +
+              "<input type='number' min='0' id='held_" + key + "' placeholder='0' value='" + held + "' oninput='calcPct(\"" + key + "\")'>" +
+              "<input type='number' min='0' id='att_"  + key + "' placeholder='0' value='" + att  + "' oninput='calcPct(\"" + key + "\")'>" +
+              "<div class='pct-pill' id='pct_" + key + "'>—</div>" +
+              "</div>";
+    }
+
+    rows.innerHTML = html;
+
+    // Recalc saved percentages
+    for (var j = 0; j < subjectArr.length; j++) {
+      var k = subjectArr[j].replace(/\s+/g, "_");
+      calcPct(k);
+    }
+
+    showSummary(sem, course);
+  }
+
+  // Calculate % for one subject and refresh the pill
+  function calcPct(key) {
+    var heldEl = document.getElementById("held_" + key);
+    var attEl  = document.getElementById("att_"  + key);
+    var pctEl  = document.getElementById("pct_"  + key);
+    if (!heldEl || !attEl || !pctEl) return;
+
+    var held = parseInt(heldEl.value) || 0;
+    var att  = parseInt(attEl.value)  || 0;
+
+    if (held <= 0) {
+      pctEl.textContent = "—";
+      pctEl.className   = "pct-pill";
+      return;
+    }
+
+    // attended can't exceed held
+    if (att > held) { attEl.value = held; att = held; }
+
+    var pct = Math.round((att / held) * 100);
+    pctEl.textContent = pct + "%";
+    pctEl.className   = "pct-pill " + (pct >= 75 ? "pct-green" : pct >= 60 ? "pct-yellow" : "pct-red");
+
+    // Live update summary
+    var sem    = document.getElementById("attSem").value;
+    var course = document.getElementById("attCourse").value;
+    if (course) showSummary(sem, course);
+  }
+
+  function saveAttendance() {
+    var sem    = document.getElementById("attSem").value;
+    var course = document.getElementById("attCourse").value;
+    if (!course) { alert("Please select a course first!"); return; }
+
+    var subjectArr = getSubjects(sem, course);
+    var record     = {};
+
+    subjectArr.forEach(function(subj) {
+      var key  = subj.replace(/\s+/g, "_");
+      var held = document.getElementById("held_" + key) ? document.getElementById("held_" + key).value : "";
+      var att  = document.getElementById("att_"  + key) ? document.getElementById("att_"  + key).value : "";
+      record[key] = { held: held, att: att };
+    });
+
+    saveAllAtt(sem, course, record);
+    alert("✅ Attendance saved!");
+  }
+
+  function resetAttendance() {
+    var sem    = document.getElementById("attSem").value;
+    var course = document.getElementById("attCourse").value;
+    if (!course) return;
+    if (!confirm("Reset all attendance for this course?")) return;
+    saveAllAtt(sem, course, {});
+    loadAttendance();
+  }
+
+  // Show overall summary card
+  function showSummary(sem, course) {
+    var subjectArr = getSubjects(sem, course);
+    var totalHeld  = 0, totalAtt = 0, below = 0, above = 0;
+
+    subjectArr.forEach(function(subj) {
+      var key   = subj.replace(/\s+/g, "_");
+      var hEl   = document.getElementById("held_" + key);
+      var aEl   = document.getElementById("att_"  + key);
+      var held  = hEl ? (parseInt(hEl.value) || 0) : 0;
+      var att   = aEl ? (parseInt(aEl.value) || 0) : 0;
+      if (held > 0) {
+        totalHeld += held;
+        totalAtt  += att;
+        var p = Math.round((att / held) * 100);
+        if (p >= 75) above++; else below++;
+      }
+    });
+
+    var overall = totalHeld > 0 ? Math.round((totalAtt / totalHeld) * 100) : 0;
+    var bigColor = overall >= 75 ? "#0e8a7a" : overall >= 60 ? "#b45309" : "#dc2626";
+
+    document.getElementById("summaryCard").style.display = "block";
+    document.getElementById("summaryGrid").innerHTML =
+      "<div class='summary-box'><div class='big' style='color:" + bigColor + "'>" + overall + "%</div><div class='lbl'>Overall</div></div>" +
+      "<div class='summary-box'><div class='big'>" + totalHeld + "</div><div class='lbl'>Total Classes</div></div>" +
+      "<div class='summary-box'><div class='big'>" + totalAtt  + "</div><div class='lbl'>Attended</div></div>" +
+      "<div class='summary-box'><div class='big' style='color:#0e8a7a'>" + above + "</div><div class='lbl'>≥ 75%</div></div>" +
+      "<div class='summary-box'><div class='big' style='color:#dc2626'>" + below + "</div><div class='lbl'>Below 75%</div></div>";
+
+    var warn = document.getElementById("warnBox");
+    if (overall < 75 && totalHeld > 0) {
+      // classes needed = (0.75 * totalHeld - totalAtt) / 0.25
+      var need = Math.ceil((0.75 * totalHeld - totalAtt) / 0.25);
+      warn.className   = "warn-box warn-danger";
+      warn.innerHTML   = "⚠️ Your attendance is below 75%. You need <strong>" + need + " more classes</strong> to reach 75%.";
+    } else if (totalHeld > 0) {
+      warn.className = "warn-box warn-ok";
+      warn.innerHTML = "✅ Great job! Your attendance is above 75%. Keep it up!";
+    } else {
+      warn.className = "";
+      warn.innerHTML = "";
+    }
+  }
+
+  // ── Page init ──
+  showEnrollmentTable();
+  loadSubjects();
+</script>
+</body>
+</html>
